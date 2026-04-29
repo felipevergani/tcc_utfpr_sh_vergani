@@ -26,7 +26,10 @@ O estudo considera a presença de dados censurados, ou seja, variáveis com limi
 
 ## 📁 Estrutura do Projeto
 
-tcc_utfpr_sh_vergani
+## 📁 Estrutura do Projeto
+
+```bash
+tcc_utfpr_sh_vergani/
 ├── data/
 │   ├── raw/              # Dados brutos
 │   ├── external/         # Dados externos (ex: SoilGrids)
