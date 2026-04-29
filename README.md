@@ -24,6 +24,46 @@ O modelo busca prever:
 
 O estudo considera a presença de dados censurados, ou seja, variáveis com limites de medição, incorporando isso na modelagem.
 
+## 📁 Estrutura do Projeto
+
+tcc_utfpr_sh_vergani
+├── data/
+│   ├── raw/              # Dados brutos
+│   ├── external/         # Dados externos (ex: SoilGrids)
+│   ├── interim/          # Dados intermediários
+│   └── processed/        # Dados prontos para modelagem
+│
+├── notebooks/
+│   ├── exploratory/      # Análise exploratória (EDA)
+│   ├── experiments/      # Testes de modelos
+│   └── results/          # Resultados e visualizações
+│
+├── src/
+│   ├── data/             # Processamento de dados
+│   ├── features/         # Engenharia de atributos
+│   ├── models/           # Treinamento e avaliação
+│   ├── visualization/    # Geração de gráficos
+│   └── utils/            # Funções auxiliares
+│
+├── models/
+│   └── saved/            # Modelos treinados
+│
+├── reports/
+│   ├── figures/          # Figuras do TCC
+│   └── tables/           # Tabelas do TCC
+│
+├── docs/
+│   └── tcc/              # Documentação e escrita do TCC
+│
+├── configs/
+│   └── config.yaml       # Configurações do projeto
+│
+├── tests/                # Testes (opcional)
+├── requirements.txt      # Dependências
+├── main.py               # Pipeline principal
+├── README.md
+└── .gitignore
+
 ## 👨‍💻 Autor
 
 **Felipe Brun Vergani**  
