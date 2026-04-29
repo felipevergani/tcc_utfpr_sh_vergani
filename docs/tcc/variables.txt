@@ -1,0 +1,153 @@
+# dataset wise variables -----------------------------------------------------------------------
+    "dataset_id", # unique identifier for the dataset of each soil profile
+    "DATASET_COARSE", # does the dataset contain samples with coarse fragments?
+    # indicators for data filtering (if needed) ----------------------------------------------------
+    "IFN_index", # boolean for samples from the Brazilian National Forest Inventory (IFN)
+    "PSEUDOSAND_index", # boolean for pseudo samples of sandy soils (remove from modelling?)
+    "PSEUDOROCK_index", # boolean for pseudo samples of rock outcrops (remove from modelling?)
+    # event wise variables -------------------------------------------------------------------------
+    "id", # unique identifier for each soil profile (dataset_id + observacao_id)
+    "observacao_id", # unique identifier for each soil profile
+    "dataset_licenca", # license of the dataset
+    "coord_x", # longitude in decimal degrees (use for plotting)
+    "coord_y", # latitude in decimal degrees (use for plotting)
+    "coord_precisao", # precision of the coordinates in meters (use for filtering perhaps)
+    "coord_fonte", # source of the coordinates (use for filtering perhaps)
+    "pais_id", # unique identifier for each country
+    "estado_id", # unique identifier for each state
+    "municipio_id", # unique identifier for each municipality
+    "data_ano", # year of the data collection
+    "stoniness", # stoniness class (pedregosidade)
+    "has_stoniness", # boolean for stoniness
+    "rockiness", # rockiness class (rochosidade)
+    "has_rockiness", # boolean for rockiness
+    "EVENT_COARSE", # Does this soil profile has a stony layer?
+    "coord_x_utm", # longitude in meters, use as predictor
+    "coord_y_utm",  # latitude in meters, use as predictor
+    "ORDER", # Soil order as defined by the Brazilian Soil Classification System (SiBCS)
+    "SUBORDER", # Soil suborder as defined by the Brazilian Soil Classification System (SiBCS)
+    "STONESOL", # Is the soil order a stony soil?
+    "Acrisols", # Probability of the soil being an Acrisol (SoilGrids)
+    "Alisols", # Probability of the soil being an Alisol (SoilGrids)
+    "Arenosols", # Probability of the soil being an Arenosol (SoilGrids)
+    "Chernozems", # Probability of the soil being a Chernosol (SoilGrids)
+    "Ferralsols", # Probability of the soil being a Ferralsol (SoilGrids)
+    "Gleysols",  # Probability of the soil being a Gleysol (SoilGrids)
+    "Histosols", # Probability of the soil being a Histosol (SoilGrids)
+    "Leptosols", # Probability of the soil being a Leptosol (SoilGrids)
+    "Lixisols", # Probability of the soil being a Lixisol (SoilGrids)
+    "Luvisols", # Probability of the soil being a Luvisol (SoilGrids)
+    "Nitisols",  # Probability of the soil being a Nitisol (SoilGrids)
+    "Phaeozems", # Probability of the soil being a Phaeozem (SoilGrids)
+    "Planosols", # Probability of the soil being a Planosol (SoilGrids)
+    "Plinthosols", # Probability of the soil being a Plinthosol (SoilGrids)
+    "Podzols", # Probability of the soil being a Podzol (SoilGrids)
+    "Regosols", # Probability of the soil being a Regosol (SoilGrids)
+    "Stagnosols", # Probability of the soil being a Stagnosol (SoilGrids)
+    "Umbrisols", # Probability of the soil being a Umbrisol (SoilGrids)
+    "Vertisols",  # Probability of the soil being a Vertisol (SoilGrids)
+    "AmazonasSolimoesProv", # Boolean for geological province (ATBD)
+    "AmazoniaProv", # Boolean for geological province (ATBD)
+    "BorboremaProv", # Boolean for geological province (ATBD)
+    "CoberturaCenozoicaProv", # Boolean for geological province (ATBD)
+    "CosteiraMargem_ContinentalProv", # Boolean for geological province (ATBD)
+    "GurupiProv", # Boolean for geological province (ATBD)
+    "MantiqueiraProv", # Boolean for geological province (ATBD)
+    "Massad_aguaProv", # Boolean for geological province (ATBD)
+    "ParanaProv", # Boolean for geological province (ATBD)
+    "ParecisProv", # Boolean for geological province (ATBD)
+    "ParnaibaProv", # Boolean for geological province (ATBD)
+    "ReconcavoTucano_JatobaProv", # Boolean for geological province (ATBD)
+    "SaoFranciscoProv", # Boolean for geological province (ATBD)
+    "SaoLuisProv", # Boolean for geological province (ATBD)
+    "TocantisProv",  # Boolean for geological province (ATBD)
+    "black_soils", # Probability of being a black soil (FAO)
+    # Terrain variables derived from digital elevation model -------
+    "altitude", # altitude above sea level in meters
+    "convergence", # convergence index
+    "cti", # compound topographic index
+    "dev_magnitude", # magnitude of the deviation from mean elevation
+    "eastness", # eastness index    
+    "elev_stdev", # standard deviation of the elevation
+    "geomorphon", # geomorphon class (flat, peak, ridge, shoulder, spur, slope, hollow, etc)
+    "hand", # height above the nearest drainage
+    "northness", # northness index
+    "pcurv", # profile curvature
+    "roughness", # roughness index
+    "slope", # slope
+    "spi", # stream power index
+    # --------------------------------------------------------
+    "lulc", # land use and land cover class (MapBiomas C10)
+    "bioma_nome", # biome name (IBGE)
+    "rockyIndex", # distance from a rocky outcrop (censored at 7000 m)
+    "sandyIndex", # distance from a sandy area (censored at 7000 m)
+    # layer wise variables
+    "camada_id", # unique identifier for each layer within a soil profile (id)
+    "camada_nome", # name of the layer
+    "profund_sup", # upper depth of the layer in cm
+    "profund_inf", # lower depth of the layer in cm
+    "esqueleto", # laboratory measurement of coarse fragments content (mass)
+    "coarse_upper", # coarse fragments content of the upper layer (mass)
+    "coarse_lower", # coarse fragments content of the lower layer (mass)
+    "vrc", # volumetric rock content in the whole soil (%)
+    "terrafina", # laboratory measurement of fine earth content
+    "argila", # laboratory measurement of clay content
+    "argila_upper", # clay content of the upper layer
+    "argila_lower",  # clay content of the lower layer
+    "silte", # laboratory measurement of silt content
+    "silt_clay_ratio", # ratio between silt and clay content
+    "areia", # laboratory measurement of sand content
+    "areia_upper", # sand content of the upper layer
+    "areia_lower",  # sand content of the lower layer
+    "carbono", # laboratory measurement of soil organic carbon content
+    "ctc", # laboratory measurement of cation exchange capacity
+    "cec_clay_ratio", # ratio between CEC and clay content
+    "ph", # laboratory measurement of soil pH
+    "dsi", # laboratory measurement of soil bulk density
+    "dsi_upper", # bulk density of the upper layer
+    "dsi_lower", # bulk density of the lower layer
+    "STONY", # presence of stones in the soil layer
+    "ORGANIC", # organic layer (high carbon content)
+    "AHRZN", # the layer is an A horizon
+    "EHRZN", # the layer is an E horizon
+    "BHRZN", # the layer is a B horizon
+    "CHRZN", # the layer is a C horizon
+    "DENSIC", # the layer has high bulk density
+    "GLEY", # the layer is a gleyed layer
+    # Soil properties from SoilGrids (process data so that it matches the layer depth)
+    "bdod_00_05cm", # soil bulk density
+    "bdod_05_15cm",
+    "bdod_15_30cm",
+    "bdod_30_60cm",
+    "bdod_60_100cm",
+    "bdod_100_200cm",
+    "clay_00_05cm", # clay content
+    "clay_05_15cm",
+    "clay_15_30cm",
+    "clay_30_60cm",
+    "clay_60_100cm",
+    "clay_100_200cm",
+    "sand_00_05cm", # sand content
+    "sand_05_15cm",
+    "sand_15_30cm",
+    "sand_30_60cm",
+    "sand_60_100cm",
+    "sand_100_200cm",
+    "soc_00_05cm", # soil organic carbon content
+    "soc_05_15cm",
+    "soc_15_30cm",
+    "soc_30_60cm",
+    "soc_60_100cm",
+    "soc_100_200cm",
+    "cfvo_00_05cm", # coarse fragments content
+    "cfvo_05_15cm",
+    "cfvo_15_30cm",
+    "cfvo_30_60cm",
+    "cfvo_60_100cm",
+    "cfvo_100_200cm",
+    # Target variables =============================================================================
+    "soc_density_gcm3_qmap", # soil organic carbon density (g/cm^3)
+    "soc_stock_gm2_qmap", # soil organic carbon stock (g/m^2) in the layer
+    "soc_stock_gm2_cum_qmap", # cummulative soil organic carbon stock (g/m^2) from the surface to the lower depth of the layer
+    # Endpoint indicator (rock == no soil) =========================================================
+    "is_rock" # boolean
