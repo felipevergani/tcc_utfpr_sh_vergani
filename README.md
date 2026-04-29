@@ -24,7 +24,7 @@ O modelo busca prever:
 
 O estudo considera a presença de dados censurados, ou seja, variáveis com limites de medição, incorporando isso na modelagem.
 
-## 📁 Estrutura do Projeto
+
 
 ## 📁 Estrutura do Projeto
 
@@ -66,7 +66,7 @@ tcc_utfpr_sh_vergani/
 ├── main.py               # Pipeline principal
 ├── README.md
 └── .gitignore
-
+```
 ## 👨‍💻 Autor
 
 **Felipe Brun Vergani**  
