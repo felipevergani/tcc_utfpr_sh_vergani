@@ -1,0 +1,55 @@
+variavel,categoria,tipo,descricao
+Acrisols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being an Acrisol (SoilGrids)
+Alisols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being an Alisol (SoilGrids)
+Arenosols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being an Arenosol (SoilGrids)
+Chernozems,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Chernosol (SoilGrids)
+Ferralsols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Ferralsol (SoilGrids)
+Gleysols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Gleysol (SoilGrids)
+Histosols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Histosol (SoilGrids)
+Leptosols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Leptosol (SoilGrids)
+Lixisols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Lixisol (SoilGrids)
+Luvisols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Luvisol (SoilGrids)
+Nitisols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Nitisol (SoilGrids)
+Phaeozems,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Phaeozem (SoilGrids)
+Planosols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Planosol (SoilGrids)
+Plinthosols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Plinthosol (SoilGrids)
+Podzols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Podzol (SoilGrids)
+Regosols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Regosol (SoilGrids)
+Stagnosols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Stagnosol (SoilGrids)
+Umbrisols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Umbrisol (SoilGrids)
+Vertisols,Classe de solo (prob. SoilGrids),numerica,Probability of the soil being a Vertisol (SoilGrids)
+bioma_nome,Contexto ambiental,categorica,biome name (IBGE)
+black_soils,Contexto ambiental,numerica,Probability of being a black soil (FAO)
+lulc,Contexto ambiental,categorica,land use and land cover class (MapBiomas C10)
+rockyIndex,Contexto ambiental,numerica,distance from a rocky outcrop (censored at 7000 m)
+sandyIndex,Contexto ambiental,numerica,distance from a sandy area (censored at 7000 m)
+coord_x_utm,Espacial (coordenadas UTM),numerica,"longitude in meters, use as predictor"
+coord_y_utm,Espacial (coordenadas UTM),numerica,"latitude in meters, use as predictor"
+AmazonasSolimoesProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+AmazoniaProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+BorboremaProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+CoberturaCenozoicaProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+CosteiraMargem_ContinentalProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+GurupiProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+MantiqueiraProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+Massad_aguaProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+ParanaProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+ParecisProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+ParnaibaProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+ReconcavoTucano_JatobaProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+SaoFranciscoProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+SaoLuisProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+TocantisProv,Provincia geologica,numerica,Boolean for geological province (ATBD)
+altitude,Terreno/relevo,numerica,altitude above sea level in meters
+convergence,Terreno/relevo,numerica,convergence index
+cti,Terreno/relevo,numerica,compound topographic index
+dev_magnitude,Terreno/relevo,numerica,magnitude of the deviation from mean elevation
+eastness,Terreno/relevo,numerica,eastness index
+elev_stdev,Terreno/relevo,numerica,standard deviation of the elevation
+geomorphon,Terreno/relevo,categorica,"geomorphon class (flat, peak, ridge, shoulder, spur, slope, hollow, etc)"
+hand,Terreno/relevo,numerica,height above the nearest drainage
+northness,Terreno/relevo,numerica,northness index
+pcurv,Terreno/relevo,numerica,profile curvature
+roughness,Terreno/relevo,numerica,roughness index
+slope,Terreno/relevo,numerica,slope
+spi,Terreno/relevo,numerica,stream power index

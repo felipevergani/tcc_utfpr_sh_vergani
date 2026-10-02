@@ -1,0 +1,345 @@
+# Helper functions for SoilData-ctb
+# author: Alessandro Samuel-Rosa
+# data: 2025
+# -----------------------------------------------------------------------------
+# Versao enxuta: mantidas apenas as funcoes uteis ao pipeline de modelagem
+# (EDA + preprocessamento). As funcoes de ingestao da planilha bruta
+# (google_sheet, soildata_catalog, depth_plus, depth_slash, concat_columns,
+# check_sheet_validation, select_output_columns) foram removidas por nao serem
+# necessarias a partir do CSV ja consolidado. O arquivo original completo esta
+# em docs/helper_original_completo.R.
+# -----------------------------------------------------------------------------
+
+# Pacote necessario
+if (!requireNamespace("data.table")) {
+  install.packages("data.table")
+}
+
+# Describe soil data ###############################################################################
+# This function summarizes a data.frame containing soil data.
+# It prints the column names, number of layers, number of events, and number of georeferenced events.
+# x: data.frame containing soil data
+# na.rm: logical, whether to remove NA values (default is TRUE)
+# Returns: None, prints the summary to the console
+# Example usage: summary_soildata(soil_data, na.rm = TRUE)
+# Note: The function assumes that the data.table package is loaded and that the data has columns
+# 'dataset_id', 'observacao_id', 'coord_x', and 'coord_y'.
+summary_soildata <- function(x, na.rm = TRUE) {
+  id <- c("dataset_id", "observacao_id")
+  cat("Column names:")
+  cat("\n", paste(names(x)), collapse = " ")
+  cat("\nLayers:", nrow(x))
+  cat("\nEvents:", nrow(unique(x[, ..id])))
+  cat("\nGeoreferenced events:", nrow(unique(x[!is.na(coord_x) & !is.na(coord_y), ..id])))
+  cat("\n")
+}
+
+# Check for missing layers #########################################################################
+# This function checks for missing layers in a data.table containing soil layer data. It identifies
+# gaps in the depth intervals of soil layers for each observation ID. Gaps are defined as instances
+# where the upper depth of one layer does not match the lower depth of the next layer. They occur
+# when soil sampling in the field does not cover the entire depth range, leading to missing layers
+# in the dataset. The function returns a data.table containing the missing layers, including the
+# observation ID, layer name, and depth intervals.
+# layer_data: data.table containing soil layer data
+# Returns: data.table with missing layers, including 'observacao_id', 'camada_nome',
+#          'profund_sup', and 'profund_inf'
+# Example usage: any_missing_layer(layer_data)
+# Note: The function assumes that the data.table package is loaded and that the data has the necessary
+# columns for observation ID, layer name, and depth intervals. If missing layers are found, a message
+# is printed to the console.
+any_missing_layer <- function(layer_data) {
+  # Start by sorting the data.table by observacao_id, profund_sup, and profund_inf
+  layer_data <- layer_data[order(observacao_id, profund_sup, profund_inf)]
+  # Check for each observacao_id if there is a missing layer
+  missing_layers <- layer_data[
+    data.table::shift(profund_inf) != profund_sup & profund_sup > 0,
+    .(observacao_id, camada_nome, profund_sup, profund_inf)
+  ]
+  if (nrow(missing_layers) > 0) {
+    message(
+      "Missing layers were found. ",
+      "Check the source dataset if this is correct or if there has been an error ",
+      "when recording the layer depth limits."
+    )
+    # Return the missing layers
+    return(missing_layers)
+  } else {
+    message("No missing layers were found. You can proceed.")
+  }
+}
+check_missing_layer <- any_missing_layer
+
+# Add missing layers ###############################################################################
+# This function adds missing layers to a data.table containing soil layer data.
+# It checks for each event ID if the top layer is missing (i.e., if the minimum depth of the top
+# layer is greater than 0). If the top layer is missing, a new row is added to the data.table with
+# depth_top set to 0 and depth_bottom set to the minimum depth of the top layer. The function also
+# identifies gaps in the depth intervals of soil layers for each event ID and adds rows for these
+# missing layers. The final result is a data.table with all layers, including the added missing
+# layers, ordered by event ID and depth_top.
+# x: data.table containing soil layer data with columns for event ID, depth top, depth bottom, and layer ID.
+# event.id: column name for event ID (default is "observacao_id")
+# depth.top: column name for depth top (default is "profund_sup")
+# depth.bottom: column name for depth bottom (default is "profund_inf")
+# layer.id: column name for layer ID (default is "camada_id")
+# Returns: data.table with all layers, including added missing layers, ordered by event ID and depth_top.
+# Example usage: add_missing_layer(layer_data)
+# Note: The function assumes that the data.table package is loaded and that the data has the
+# necessary columns for event ID, depth top, depth bottom, and layer ID.
+add_missing_layer <- function(
+    x, event.id = "observacao_id", depth.top = "profund_sup", depth.bottom = "profund_inf",
+    layer.id = "camada_id", layer.name = "camada_nome") {
+
+  # Ensure x is a data.table
+  data.table::setDT(x)
+
+  # Rename columns
+  old_names <- c(event.id, depth.top, depth.bottom, layer.id, layer.name)
+  new_names <- c("event_id", "depth_top", "depth_bottom", "layer_id", "layer_name")
+  data.table::setnames(x, old = old_names, new = new_names)
+
+  # Check for each event_id if it is missing the top layer, i.e. min(depth_top) > 0
+  x[, missing_top := min(depth_top) > 0, by = event_id]
+
+  # If the top layer is missing
+  if (any(x$missing_top)) {
+    message("Missing top layer found. Adding a new row with depth_top = 0.")
+    # Add a row to the data.table. Then, for the new row, set
+    # depth_top = 0 and depth_bottom = min(depth_top)
+    x <- rbind(x, x[missing_top == TRUE, .(
+        event_id = event_id,
+        depth_top = 0,
+        depth_bottom = min(depth_top)
+      )], fill = TRUE)
+  } else {
+    message("No missing top layer found.")
+  }
+  x[, missing_top := NULL]
+
+  # Order x by profile_id and depth_top
+  data.table::setorder(x, event_id, depth_top)
+
+  # Create a new data.table to store the missing layers
+  missing_layers <- x[, .(
+    depth_top = depth_bottom[-.N],
+    depth_bottom = data.table::shift(depth_top, type = "lead")[-.N]
+  ), by = event_id][depth_top != depth_bottom]
+
+  # Combine the original data with the missing layers
+  result <- rbind(x, missing_layers, fill = TRUE)
+
+  # Set layer_name using the depth limits (top-bottom)
+  result[is.na(layer_name), layer_name := paste0(depth_top, "-", depth_bottom)]
+
+  # Order the result by event.id and depth_top
+  data.table::setorder(result, event_id, depth_top)
+
+  # Reset layer_id according to the new order
+  result[, layer_id := seq_len(.N), by = event_id]
+
+  # Rename columns
+  data.table::setnames(result, old = new_names, new = old_names)
+
+  # Return the result
+  return(result)
+}
+
+# Check for repeated layers ########################################################################
+# This function checks for repeated layers in a data.table containing soil layer data.
+# It identifies instances where the same layer name, upper depth, and lower depth appear multiple
+# times for the same observation ID. Repeated layers can occur due to data entry errors or
+# inconsistencies in the dataset. The function returns a data.table containing the repeated layers,
+# including the observation ID, layer name, upper depth, lower depth, and the count of occurrences.
+# data: data.table containing soil layer data with columns 'observacao_id', 'camada_nome',
+#       'profund_sup', and 'profund_inf'.
+# Returns: data.table with repeated layers, including 'observacao_id', 'camada_nome',
+#          'profund_sup', 'profund_inf', and 'N' (count of occurrences).
+# Example usage: check_repeated_layer(layer_data)
+# Note: The function assumes that the data.table package is loaded and that the data has the necessary
+# columns for observation ID, layer name, and depth intervals. If repeated layers are found, a
+# message is printed to the console.
+check_repeated_layer <- function(data) {
+  repeated_layers <- data[, .N, by = .(observacao_id, camada_nome, profund_sup, profund_inf)][N > 1]
+  if (nrow(repeated_layers) > 0) {
+    message(
+      "Repeated layers were found. ",
+      "Check the source dataset if this is correct or if there has been an error ",
+      "during data entry."
+    )
+  }
+  return(repeated_layers)
+}
+check_duplicated_layer <- check_repeated_layer
+
+# Check for empty layers ###########################################################################
+# This function checks for empty layers in a data.table containing soil layer data.
+# It identifies layers where a specific variable (e.g., 'argila', 'silte', 'areia') has missing values (NA).
+# The function returns a data.table containing the empty layers, including the observation ID,
+# layer name, upper depth, lower depth, and the variable with missing values.
+# x: data.table containing soil layer data with columns 'observacao_id', 'camada_nome',
+#     'profund_sup', 'profund_inf', and the variable to check for missing values (e.g., 'argila').
+# var: character string representing the variable to check for missing values (e.g., 'argila')
+# Returns: data.table with empty layers, including 'observacao_id', 'camada_nome',
+#          'profund_sup', 'profund_inf', and the variable with missing values.
+# Example usage: check_empty_layer(layer_data, "argila")
+# Note: The function assumes that the data.table package is loaded and that the data has the necessary
+# columns for observation ID, layer name, depth intervals, and the variable to check. If empty
+# layers are found, a message is printed to the console.
+find_empty_layer <- function(x, var) {
+  # Select only the rows where the specified variable is NA
+  empty_layers <- x[is.na(get(var)),
+    .(observacao_id, camada_nome, profund_sup, profund_inf, get(var))]
+  if (nrow(empty_layers) > 0) {
+    message(
+      "Empty layers were found for variable '", var, "'. ",
+      "Check the source dataset if this is correct or if there has been an error ",
+      "during data entry."
+    )
+  }
+  return(empty_layers)
+}
+check_empty_layer <- find_empty_layer
+
+# Spline function to fill empty layers #############################################################
+# This function fills missing values in a numeric vector using spline interpolation.
+# It takes a numeric vector 'y' with missing values (NA) and a corresponding numeric vector 'x'
+# representing the x-coordinates. The function applies several checks to determine if spline
+# interpolation is appropriate. If the conditions are met, it performs spline interpolation to
+# fill the missing values. Otherwise, it returns the original vector 'y' unchanged.
+# y: numeric vector with missing values (NA) to be filled
+# x: numeric vector representing the x-coordinates corresponding to 'y'
+# ylim: range of acceptable values for 'y'
+# Returns: numeric vector with missing values filled using spline interpolation, or the original
+#          vector 'y' if conditions are not met
+# Example usage: fill_empty_layer(c(1, NA, 3), c(1, 2, 3)) # returns c(1, 2, 3)
+# Note: The function includes several checks to ensure that spline interpolation is only applied
+# when appropriate, such as when there are enough non-missing values and no consecutive missing
+# values. It prints a message to the console indicating whether interpolation was performed.
+fill_empty_layer <- function(y, x, ylim) {
+  # Check if y is numeric
+  if (!is.numeric(y)) {
+    stop("y must be a numeric vector")
+  }
+  # Standard output message when conditions for interpolation are not met
+  no_interpolation_message <-
+    "NA values found. Conditions not met. Spline interpolation not applied. Returning original vector."
+
+  # If no NA, return y
+  if (all(!is.na(y))) {
+    message("No NA values found. Returning original vector.")
+    return(y)
+  }
+
+  # If only one point, return it
+  if (length(y) == 1) {
+    message(no_interpolation_message)
+    return(y)
+  }
+  # If more NA than not NA, return y
+  if (sum(!is.na(y)) < sum(is.na(y))) {
+    message(no_interpolation_message)
+    return(y)
+  }
+  # If length(y) == 2, one NA, return y
+  if (length(y) == 2 & sum(is.na(y)) == 1) {
+    message(no_interpolation_message)
+    return(y)
+  }
+  # If y[1] is NA, return NA
+  if (is.na(y[1])) {
+    message(no_interpolation_message)
+    return(y)
+  }
+  # If all NA, return y
+  if (sum(!is.na(y)) == 0) {
+    message(no_interpolation_message)
+    return(y)
+  }
+  # If three points, two not NA, and y[3] is NA, return y
+  # This avoids extrapolation with only two points
+  if (length(y) == 3 & sum(!is.na(y)) == 2 & is.na(y[3])) {
+    message(no_interpolation_message)
+    return(y)
+  }
+  # If two consecutive points are NA, return y
+  if (sum(is.na(y)) > 1 & any(diff(is.na(y)) == 1)) {
+    message(no_interpolation_message)
+    return(y)
+  }
+  # Else, return spline
+  message("NA values found. Conditions met. Spline interpolation applied.")
+  out <- spline(y = y, x = x, xout = x, method = "natural")$y
+  # Correct values outside ylim if ylim is provided
+  if (!missing(ylim)) {
+    out[out < ylim[1]] <- ylim[1]
+    out[out > ylim[2]] <- ylim[2]
+  }
+  return(out)
+}
+
+# Check for equal coordinates ######################################################################
+# This function checks for equal coordinates in a data.table containing soil data.
+check_equal_coordinates <-
+  function(dt) {
+    dup_groups <- dt[!(is.na(coord_x) & is.na(coord_y)), .N, by = .(coord_x, coord_y)][N > 1]
+    if (nrow(dup_groups) > 0) {
+      # Build one row per coordinate pair concatenating all observacao_id that share the pair
+      dup_set <- dt[dup_groups, on = .(coord_x, coord_y), nomatch = 0L][
+        , .(coord_x, coord_y, observacao_id)
+      ]
+      dup_out <- dup_set[
+        , .(observacao_id = paste(sort(unique(observacao_id)), collapse = ", "))
+        , by = .(coord_x, coord_y)
+      ][order(coord_x, coord_y)]
+      warning("Duplicate coordinates found. Listing coordinate pairs with all observacao_id sharing them:")
+      print(dup_out)
+      warning("Check the source dataset to resolve this issue.\nIf no solution is found, consider adding a random perturbation of 1 meter to the coordinates and updating the coordinate precision accordingly using the Pythagorean theorem for propagation of uncertainty.")
+    } else {
+      message("No duplicate coordinates found: all coordinates are unique. You can proceed.")
+    }
+  }
+check_duplicated_coordinates <- check_equal_coordinates
+
+# Check for equal layer depths #####################################################################
+# This function checks for layers where the upper and lower depth limits are equal.
+# data: data.table containing soil layer data with 'profund_sup' and 'profund_inf' columns.
+# Returns: data.table with layers having equal depths.
+check_equal_depths <- function(data) {
+  equal_depths <- data[profund_sup == profund_inf,
+    .(observacao_id, camada_nome, profund_sup, profund_inf)
+  ]
+  if (nrow(equal_depths) > 0) {
+    message(
+      "Layers with equal upper and lower depth limits were found. ",
+      "This might indicate an issue with the data recording, such as a layer with zero thickness."
+    )
+    print(equal_depths)
+  } else {
+    message("No layers with equal upper and lower depth limits were found. You can proceed.")
+  }
+  return(invisible(equal_depths))
+}
+
+# Check for inverted or negative layer depths ######################################################
+# This function checks for layers with inverted depth limits (profund_inf < profund_sup)
+# or negative depth values. These can sometimes indicate special cases like organic layers
+# above the mineral soil surface (negative depths) or data entry errors.
+# data: data.table containing soil layer data with 'profund_sup' and 'profund_inf' columns.
+# Returns: data.table with layers having inverted or negative depths.
+check_depth_inversion <- function(data) {
+  inverted_depths <- data[profund_inf < profund_sup | profund_sup < 0,
+    .(observacao_id, camada_nome, profund_sup, profund_inf)
+  ]
+  if (nrow(inverted_depths) > 0) {
+    message(
+      "Layers with inverted or negative depths were found. ",
+      "This might indicate organic layers recorded with negative depths or data entry errors. ",
+      "Please review the identified layers."
+    )
+    print(inverted_depths)
+  } else {
+    message("No layers with inverted or negative depths were found. You can proceed.")
+  }
+  return(invisible(inverted_depths))
+}
